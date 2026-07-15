@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  // Backend de ejemplo incluido en /backend (ver backend/README.md).
+  // Cambiar por la URL del backend real del grupo cuando esté disponible.
+  apiUrl: 'http://localhost:3000/api',
 };
 
 /*
