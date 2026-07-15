@@ -6,7 +6,7 @@ import {
   SQLiteDBConnection,
 } from '@capacitor-community/sqlite';
 
-import { CREATE_TABLE_RUTAS, SEED_RUTAS } from './rutas.sql';
+import { CREATE_TABLE_RUTAS, MIGRACIONES_SYNC, SEED_RUTAS } from './rutas.sql';
 
 const DB_NAME = 'rutas_universitarias_db';
 
@@ -63,6 +63,10 @@ export class DatabaseService {
       // Fase 1: script de inicialización (creación de tabla)
       await this.db.execute(CREATE_TABLE_RUTAS);
 
+      // Fase 1.b (Parte 2): agrega columnas de sincronización si la tabla
+      // ya existía de una instalación previa (Parte 1) sin estas columnas.
+      await this.aplicarMigracionesSync();
+
       // Fase 2: datos semilla, solo si la tabla está vacía
       const total = await this.db.query('SELECT COUNT(*) AS total FROM rutas;');
       const cantidad = total.values?.[0]?.['total'] ?? 0;
@@ -75,6 +79,25 @@ export class DatabaseService {
     } catch (error) {
       console.error('Error al inicializar la base de datos SQLite:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Ejecuta cada ALTER TABLE de forma independiente e ignora el error
+   * "duplicate column name" cuando la columna ya existe (SQLite no soporta
+   * `ADD COLUMN IF NOT EXISTS`). Así la migración es segura de repetir en
+   * cada arranque de la app.
+   */
+  private async aplicarMigracionesSync(): Promise<void> {
+    for (const sentencia of MIGRACIONES_SYNC) {
+      try {
+        await this.db.execute(sentencia);
+      } catch (error) {
+        const mensaje = String((error as any)?.message ?? error).toLowerCase();
+        if (!mensaje.includes('duplicate column')) {
+          console.warn('Migración de sincronización omitida:', sentencia, error);
+        }
+      }
     }
   }
 
@@ -92,4 +115,6 @@ export class DatabaseService {
       await this.sqlite.saveToStore(DB_NAME);
     }
   }
+}
+
 }
