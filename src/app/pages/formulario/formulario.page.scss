@@ -1,0 +1,42 @@
+ion-content {
+  --background: #f5f7fb;
+}
+ion-card {
+  max-width: 850px;
+  margin: 25px auto;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  padding: 10px;
+}
+ion-item {
+  --background: #ffffff;
+  --color: #222;
+  --border-color: #d9d9d9;
+  --min-height: 52px;
+  margin-bottom: 6px;
+}
+ion-label {
+  color: #444 !important;
+  font-size: 14px;
+}
+ion-input,
+ion-select {
+  --color: #222;
+}
+ion-button{
+    height:40px;
+    margin-top:12px;
+}
+ion-select {
+  --color:#222;
+  color:#222;
+}
+ion-select::part(text){
+    color:#222;
+}
+ion-select::part(icon){
+
+    color:#666;
+
+}
