@@ -20,7 +20,7 @@ import {
 } from '@ionic/angular/standalone';
 
 import { Ruta } from '../../models/ruta.model';
-import { RutasService } from '../../services/rutas.service';
+import { RutasRepository } from '../../repositories/rutas.repository';
 
 @Component({
   selector: 'app-rutas',
@@ -50,7 +50,12 @@ export class RutasPage implements OnInit {
   rutas: Ruta[] = [];
   cargando = true;
 
-  constructor(private rutasService: RutasService) { }
+  constructor(private rutasRepository: RutasRepository) {
+    // Se actualiza automáticamente cuando el repositorio refresca desde la API.
+    this.rutasRepository.rutas$.subscribe((rutas) => {
+      this.rutas = rutas;
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     await this.cargarRutas();
@@ -61,12 +66,13 @@ export class RutasPage implements OnInit {
     await this.cargarRutas();
   }
 
+  /** Local-first: muestra de inmediato lo que hay en SQLite y refresca en segundo plano desde la API. */
   async cargarRutas(): Promise<void> {
     this.cargando = true;
     try {
-      this.rutas = await this.rutasService.findAll();
+      this.rutas = await this.rutasRepository.obtenerRutas();
     } catch (error) {
-      console.error('Error al cargar rutas desde SQLite:', error);
+      console.error('Error al cargar rutas desde el repositorio local:', error);
     } finally {
       this.cargando = false;
     }
