@@ -1,5 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { defineCustomElements as jeepSqliteElements } from 'jeep-sqlite/loader';
 
@@ -16,5 +17,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
+    // Parte 2: cliente HTTP usado por RutasRemoteService para consumir la API REST.
+    provideHttpClient(withFetch()),
   ],
 });
