@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Rutas Universitarias</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <div class="encabezado">
+    <h2>Transporte Universitario</h2>
+    <p>Consulta las rutas disponibles para llegar a la universidad.</p>
+  </div>
+  <div class="ion-text-center" *ngIf="cargando">
+    <p>Cargando rutas desde SQLite...</p>
+  </div>
+  <div class="ion-text-center" *ngIf="!cargando && rutas.length === 0">
+    <p>No hay rutas registradas todavía.</p>
+  </div>
+  <div class="contenedor">
+    <ion-card *ngFor="let ruta of rutas">
+    <ion-card-header>
+      <ion-card-title>
+        {{ ruta.nombre }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Origen:</strong> {{ ruta.origen }}</p>
+      <p><strong>Destino:</strong> {{ ruta.destino }}</p>
+      <p><strong>Horario:</strong> {{ ruta.horario }}</p>
+      <p><strong>Tarifa:</strong> ${{ ruta.tarifa }}</p>
+      <ion-button expand="block" color="primary" [routerLink]="['/detalle', ruta.id]">
+        Ver detalle
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</div>
+  <ion-button class="boton-agregar" expand="block" color="success" routerLink="/formulario">
+  Agregar Ruta
+  </ion-button>
+
+</ion-content>

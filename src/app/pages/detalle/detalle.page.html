@@ -1,0 +1,58 @@
+<ion-content>
+  <div class="contenedor" *ngIf="cargando">
+    <p>Cargando detalle desde SQLite...</p>
+  </div>
+
+  <div class="contenedor" *ngIf="!cargando && !ruta">
+    <p>No se encontró la ruta solicitada.</p>
+    <ion-button fill="outline" size="small" (click)="volver()">
+      Volver
+    </ion-button>
+  </div>
+
+  <div class="contenedor" *ngIf="!cargando && ruta">
+    <div class="card">
+      <div class="cabecera">
+        <h2>{{ ruta.nombre }}</h2>
+        <span class="estado">
+        {{ ruta.estado }}
+        </span>
+      </div>
+      <div class="fila">
+      <label>Origen</label>
+      <span>{{ ruta.origen }}</span>
+      </div>
+      <div class="fila">
+      <label>Destino</label>
+      <span>{{ ruta.destino }}</span>
+    </div>
+    <div class="fila">
+    <label>Horario</label>
+    <span>{{ ruta.horario }}</span>
+    </div>
+    <div class="fila">
+    <label>Tarifa</label>
+    <span>${{ ruta.tarifa }}</span>
+    </div>
+    <div class="fila">
+    <label>Bus</label>
+    <span>{{ ruta.bus }}</span>
+    </div>
+    <div class="fila">
+    <label>Conductor</label>
+    <span>{{ ruta.conductor }}</span>
+    </div>
+    <div class="acciones">
+    <ion-button color="primary" size="small" (click)="editarRuta()">
+    Editar
+    </ion-button>
+    <ion-button color="danger" size="small" (click)="eliminarRuta()">
+    Eliminar
+    </ion-button>
+    <ion-button fill="outline" size="small" (click)="volver()">
+    Volver
+    </ion-button>
+    </div>
+  </div>
+</div>
+</ion-content>

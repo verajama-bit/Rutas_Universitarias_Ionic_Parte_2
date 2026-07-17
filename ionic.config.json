@@ -1,0 +1,7 @@
+{
+  "name": "RUTAS_UNIVERSITARIAS_IONIC",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

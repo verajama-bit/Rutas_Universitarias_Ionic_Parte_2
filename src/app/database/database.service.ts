@@ -1,0 +1,131 @@
+import { Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import {
+  CapacitorSQLite,
+  SQLiteConnection,
+  SQLiteDBConnection,
+} from '@capacitor-community/sqlite';
+
+import { CREATE_TABLE_RUTAS, MIGRACIONES_SYNC, SEED_RUTAS } from './rutas.sql';
+
+const DB_NAME = 'rutas_universitarias_db';
+
+/**
+ * Servicio base de acceso a SQLite.
+ * Se encarga de abrir la conexión a la base de datos local,
+ * crear la tabla del módulo si no existe e insertar los datos semilla.
+ * Los servicios de cada entidad (por ejemplo RutasService) reutilizan
+ * este servicio para obtener la conexión ya lista.
+ */
+@Injectable({ providedIn: 'root' })
+export class DatabaseService {
+  private sqlite: SQLiteConnection = new SQLiteConnection(CapacitorSQLite);
+  private db!: SQLiteDBConnection;
+  private ready = false;
+  private initPromise: Promise<void> | null = null;
+
+  /**
+   * Inicializa la conexión a la base de datos local.
+   * Es segura de llamar varias veces: solo ejecuta la inicialización una vez.
+   */
+  async initDatabase(): Promise<void> {
+    if (!this.initPromise) {
+      this.initPromise = this.crearConexion();
+    }
+    return this.initPromise;
+  }
+
+  private async crearConexion(): Promise<void> {
+    try {
+      if (Capacitor.getPlatform() === 'web') {
+        // 1. Verificar si <jeep-sqlite> existe en el body; si no, crearlo e inyectarlo dinámicamente
+        let jeepSqliteEl = document.querySelector('jeep-sqlite');
+        if (!jeepSqliteEl) {
+          jeepSqliteEl = document.createElement('jeep-sqlite');
+          document.body.appendChild(jeepSqliteEl);
+        }
+
+        // 2. Esperar a que el navegador registre el Web Component de Stencil
+        await customElements.whenDefined('jeep-sqlite');
+
+        // 3. Inicializar el WebStore de SQLite para navegador
+        await this.sqlite.initWebStore();
+      }
+
+      const consistencia = await this.sqlite.checkConnectionsConsistency();
+      const conexionExiste = (await this.sqlite.isConnection(DB_NAME, false)).result;
+
+      if (consistencia.result && conexionExiste) {
+        this.db = await this.sqlite.retrieveConnection(DB_NAME, false);
+      } else {
+        this.db = await this.sqlite.createConnection(
+          DB_NAME,
+          false,
+          'no-encryption',
+          1,
+          false
+        );
+      }
+
+      await this.db.open();
+
+      // Fase 1: script de inicialización (creación de tabla)
+      await this.db.execute(CREATE_TABLE_RUTAS);
+
+      // Fase 1.b (Parte 2): agrega columnas de sincronización si la tabla
+      // ya existía de una instalación previa sin estas columnas.
+      await this.aplicarMigracionesSync();
+
+      // Fase 2: datos semilla, solo si la tabla está vacía
+      const total = await this.db.query('SELECT COUNT(*) AS total FROM rutas;');
+      const cantidad = total.values?.[0]?.['total'] ?? 0;
+      if (cantidad === 0) {
+        await this.db.execute(SEED_RUTAS);
+      }
+
+      await this.guardarEnStoreWeb();
+      this.ready = true;
+    } catch (error) {
+      console.error('Error al inicializar la base de datos SQLite:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Ejecuta cada ALTER TABLE de forma independiente e ignora el error
+   * "duplicate column name" cuando la columna ya existe (SQLite no soporta
+   * `ADD COLUMN IF NOT EXISTS`). Así la migración es segura de repetir en
+   * cada arranque de la app.
+   */
+  private async aplicarMigracionesSync(): Promise<void> {
+    for (const sentencia of MIGRACIONES_SYNC) {
+      try {
+        await this.db.execute(sentencia);
+      } catch (error) {
+        const mensaje = String((error as any)?.message ?? error).toLowerCase();
+        if (!mensaje.includes('duplicate column')) {
+          console.warn('Migración de sincronización omitida:', sentencia, error);
+        }
+      }
+    }
+  }
+
+  /** Devuelve la conexión abierta, inicializando la base de datos si aún no lo está. */
+  async getConnection(): Promise<SQLiteDBConnection> {
+    if (!this.ready) {
+      await this.initDatabase();
+    }
+    return this.db;
+  }
+
+  /** Persiste los cambios en el store web (jeep-sqlite/IndexedDB) tras cada escritura. */
+  async guardarEnStoreWeb(): Promise<void> {
+    if (Capacitor.getPlatform() === 'web') {
+      try {
+        await this.sqlite.saveToStore(DB_NAME);
+      } catch (error) {
+        console.warn('Error al guardar en el store web de SQLite:', error);
+      }
+    }
+  }
+}

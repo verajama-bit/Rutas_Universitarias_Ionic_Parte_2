@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ modoEdicion ? 'Editar Ruta' : 'Nueva Ruta' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Nombre de la ruta</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.nombre"
+          placeholder="Ej. Ruta Centro - UTM">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Origen</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.origen"
+          placeholder="Lugar de salida">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Destino</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.destino"
+          placeholder="Lugar de destino">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Horario</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.horario"
+          placeholder="06:30 - 20:00">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Tarifa</ion-label>
+        <ion-input
+          type="number"
+          [(ngModel)]="ruta.tarifa"
+          placeholder="0.35">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Conductor</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.conductor"
+          placeholder="Nombre del conductor">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Bus</ion-label>
+        <ion-input
+          [(ngModel)]="ruta.bus"
+          placeholder="Ej. Bus 01">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Estado</ion-label>
+        <ion-select [(ngModel)]="ruta.estado">
+          <ion-select-option value="Activa">
+            Activa
+          </ion-select-option>
+          <ion-select-option value="Inactiva">
+            Inactiva
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-button
+        expand="block"
+        color="success"
+        (click)="guardarRuta()">
+        {{ modoEdicion ? 'Actualizar Ruta' : 'Guardar Ruta' }}
+      </ion-button>
+      <ion-button
+        expand="block"
+        color="medium"
+        fill="outline"
+        (click)="cancelar()">
+        Cancelar
+      </ion-button>
+    </ion-card-content>
+
+  </ion-card>
+
+</ion-content>

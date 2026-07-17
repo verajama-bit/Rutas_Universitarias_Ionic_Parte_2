@@ -1,0 +1,26 @@
+ion-content{
+    --background:#f5f7fb;
+}
+.hero{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:25px;
+}
+.hero h1{
+    font-size:42px;
+    color:#1e3a5f;
+    font-weight:bold;
+}
+.hero p{
+    max-width:500px;
+    color:#6b7280;
+    margin:18px 0 30px;
+}
+.hero ion-button{
+    width:220px;
+    height:42px;
+}
