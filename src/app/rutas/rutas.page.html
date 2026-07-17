@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      Rutas Universitarias
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Sincronización -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        Sincronización
+      </ion-card-title>
+      <ion-card-subtitle>
+        Gestión de operaciones pendientes
+      </ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Si existen operaciones pendientes por falta de conexión,
+        puede sincronizarlas manualmente.
+      </p>
+      <ion-button
+        expand="block"
+        color="success"
+        (click)="sincronizarPendientes()">
+        <ion-icon
+          slot="start"
+          name="sync-outline">
+        </ion-icon>
+        Sincronizar pendientes
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
