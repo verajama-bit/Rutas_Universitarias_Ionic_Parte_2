@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { RouterLink } from '@angular/router';
 
 import { RutasRemoteService } from '../../services/rutas-remote.service';
+import { PendingSyncOperation, PendingSyncService } from '../../services/pending-sync.service';
 import { Ruta } from '../../models/ruta.model';
 
 @Component({
@@ -15,25 +16,64 @@ import { Ruta } from '../../models/ruta.model';
 })
 export class RutasPage implements OnInit {
   rutas: Ruta[] = [];
-  cargando: boolean = true;
+  cargando = true;
+  mensajeEstado = '';
+  sincronizando = false;
 
-  constructor(private rutasRemoteService: RutasRemoteService) {}
+  constructor(
+    private readonly rutasRemoteService: RutasRemoteService,
+    private readonly pendingSyncService: PendingSyncService
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.cargarRutasRemotas();
   }
 
-  cargarRutasRemotas() {
+  cargarRutasRemotas(): void {
     this.cargando = true;
+    this.mensajeEstado = '';
+
     this.rutasRemoteService.getRutas().subscribe({
       next: (data: Ruta[]) => {
         this.rutas = data;
         this.cargando = false;
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Error al conectar con la API:', err);
         this.cargando = false;
+        this.mensajeEstado = 'No fue posible cargar las rutas desde la fuente remota.';
       }
     });
   }
+
+  registrarOperacionPendiente(): void {
+    const hayConexion = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+    if (hayConexion) {
+      this.mensajeEstado = 'Conexión disponible. La operación continúa normalmente.';
+      return;
+    }
+
+    const resultado = this.pendingSyncService.guardarOperacion('crear_ruta', {
+      nombre: 'Ruta pendiente',
+      origen: 'Universidad',
+      destino: 'Centro'
+    });
+
+    this.mensajeEstado = resultado.message;
+  }
+
+  async sincronizarPendientes(): Promise<void> {
+    this.sincronizando = true;
+    this.mensajeEstado = '';
+
+    const resultado = await this.pendingSyncService.sincronizar(async (operacion: PendingSyncOperation) => {
+      console.log('Sincronizando operación pendiente:', operacion);
+      return true;
+    });
+
+    this.mensajeEstado = resultado.message;
+    this.sincronizando = false;
+  }
+}
 }
